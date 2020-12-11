@@ -1,0 +1,17 @@
+# - Configuration Metadata
+#@description Chain pipeline using a single custom module
+#@key_label   "name"
+#@meta_label  "type"
+
+# - Custom modules
+# The "flreconstruct.plugins" section to tell flreconstruct what
+# to load and from where.
+[name="flreconstruct.plugins" type="flreconstruct::section"]
+plugins : string[1] = "MyModuleSD"
+MyModuleSD.directory : string = "@PROJECT_BINARY_DIR@"
+
+# - Pipeline configuration
+# Must define "pipeline" as this is the main module flreconstruct will use
+# Make it use our custom module by setting the 'type' key to its typename
+# At present, it takes no configuration, so it suffices to declare it
+[name="pipeline" type="MyModuleSD"]
