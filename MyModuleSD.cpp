@@ -51,32 +51,19 @@ void MyModuleSD::initialize(const datatools::properties &, datatools::service_ma
 dpp::chain_module::process_status MyModuleSD::process (datatools::things &event)
 {
   std::cout << "+++ MyModuleSd::process()" << std::endl;
-
+  
   auto& simData = event.get<mctools::simulated_data>("SD");
   //  simData.tree_dump();
   
   if (simData.has_step_hits ("calo")){
     for (auto& a_calo_hit :  simData.get_step_hits("calo")){
-
-	
       auto& geom_hit =  a_calo_hit->get_geom_id();
-      //geom_hit.get(0);
-      // geom_hit.get(1);
-      // geom_hit.get(2);
-      std::cout << "om_id :  " << geom_hit.get(1)*260+geom_hit.get(2)*13 + geom_hit.get(3)  <<std::endl;
-
-      //a_calo_hit.get_energy_deposit();
-      //a_calo_hit.get_time_start();
+      int om_id = geom_hit.get(1)*260+geom_hit.get(2)*13 + geom_hit.get(3);
+      double energy_dep = a_calo_hit->get_energy_deposit();
       
-      std::cout << "energy : " << a_calo_hit->get_energy_deposit()  <<std::endl;
-      std::cout << "// " <<std::endl;
-      
-      //}
+      std::cout << "om_id :  " << om_id  << "    energy deposit :  " << energy_dep << std::endl  ;
     }
   }	     
-
-  //  Const hit_handle_collection_type& mctools::simulated_data::get_step_hits ( const std::string &  category_) const
-  //  const geomtools::geom_id & get_geom_id () const
 
   ++nb_events_processed;
   return PROCESS_OK;}
