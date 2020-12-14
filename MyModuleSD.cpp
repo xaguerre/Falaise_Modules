@@ -51,6 +51,10 @@ void MyModuleSD::initialize(const datatools::properties &, datatools::service_ma
 dpp::chain_module::process_status MyModuleSD::process (datatools::things &event)
 {
   std::cout << "+++ MyModuleSd::process()" << std::endl;
+
+  double energie[712];
+  memset(energie, 0, 712*sizeof(double));
+
   
   auto& simData = event.get<mctools::simulated_data>("SD");
   //  simData.tree_dump();
@@ -58,12 +62,27 @@ dpp::chain_module::process_status MyModuleSD::process (datatools::things &event)
   if (simData.has_step_hits ("calo")){
     for (auto& a_calo_hit :  simData.get_step_hits("calo")){
       auto& geom_hit =  a_calo_hit->get_geom_id();
-      int om_id = geom_hit.get(1)*260+geom_hit.get(2)*13 + geom_hit.get(3);
-      double energy_dep = a_calo_hit->get_energy_deposit();
-      
-      std::cout << "om_id :  " << om_id  << "    energy deposit :  " << energy_dep << std::endl  ;
+      int om_id = 0;
+      if (geom_hit.get(1) <= 1){
+      om_id = geom_hit.get(1)*260+geom_hit.get(2)*13 + geom_hit.get(3);
+      }
+      if (geom_hit.get(1) == 2){
+	om_id = 520 + geom_hit.get(1)*64 + geom_hit.get(2)*32  + geom_hit.get(3)*16 + geom_hit.get(4);
+      }
+      if (geom_hit.get(1) == 3){
+	om_id = 648 + geom_hit.get(1)*32 +geom_hit.get(2)*32;
+      }
+      energie[om_id] = energie[om_id] + a_calo_hit->get_energy_deposit();
+
     }
   }	     
+
+  for (int j =0; j < 712 ; j++){
+    if (energie[j] > 0){
+      std::cout <<"om_id : " << j << "   energie deposit : " << energie[j]<< std::endl;
+    }
+  }
+  
 
   ++nb_events_processed;
   return PROCESS_OK;}
