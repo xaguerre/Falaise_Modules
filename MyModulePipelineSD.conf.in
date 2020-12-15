@@ -15,3 +15,5 @@ MyModuleSD.directory : string = "@PROJECT_BINARY_DIR@"
 # Make it use our custom module by setting the 'type' key to its typename
 # At present, it takes no configuration, so it suffices to declare it
 [name="pipeline" type="MyModuleSD"]
+
+
