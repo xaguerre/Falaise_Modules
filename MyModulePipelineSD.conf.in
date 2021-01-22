@@ -16,4 +16,3 @@ MyModuleSD.directory : string = "@PROJECT_BINARY_DIR@"
 # At present, it takes no configuration, so it suffices to declare it
 [name="pipeline" type="MyModuleSD"]
 
-

@@ -17,6 +17,8 @@ public:
 
   void initialize(const datatools::properties &, datatools::service_manager &, dpp::module_handle_dict_type &);
   dpp::chain_module::process_status process(datatools::things &);
+  //:myparam( ps.get<std::string>("outputfile", "Energie_OM.root") )
+
 
   void finalize();
   
@@ -24,6 +26,7 @@ private:
   // Bayeux' macro to register this class as data processing module
   DPP_MODULE_REGISTRATION_INTERFACE(MyModuleSD);
 
+  double energy_tot;
   std::vector <double> energy_vector;
   std::vector <int> om_id_vector;  
 
@@ -61,6 +64,7 @@ void MyModuleSD::initialize(const datatools::properties & parameters, datatools:
   Result_tree= new TTree("Result_tree","");
   Result_tree->Branch("om_id", &om_id_vector);
   Result_tree->Branch("energy", &energy_vector);
+  Result_tree->Branch("energy_tot", &energy_tot);
 
 
 
@@ -68,9 +72,10 @@ void MyModuleSD::initialize(const datatools::properties & parameters, datatools:
 
 dpp::chain_module::process_status MyModuleSD::process (datatools::things &event)
 {
-  std::cout << "+++ MyModuleSd::process()" << std::endl;
+  //  std::cout << "+++ MyModuleSd::process()" << std::endl;
 
   double energy_array[712];
+  
   memset(energy_array, 0, 712*sizeof(double));
 
   
@@ -84,8 +89,8 @@ dpp::chain_module::process_status MyModuleSD::process (datatools::things &event)
       energy_array[an_om_id] += a_calo_hit->get_energy_deposit();
     }
   }
-  if (simData.has_step_hits ("xwall")){
-    for (auto& a_calo_hit :  simData.get_step_hits("xwall")){
+  if (simData.has_step_hits ("xcalo")){
+    for (auto& a_calo_hit :  simData.get_step_hits("xcalo")){
       auto& geom_hit =  a_calo_hit->get_geom_id();
       int an_om_id = 520 + geom_hit.get(1)*64 + geom_hit.get(2)*32  + geom_hit.get(3)*16 + geom_hit.get(4);
       energy_array[an_om_id] += a_calo_hit->get_energy_deposit();
@@ -98,25 +103,32 @@ dpp::chain_module::process_status MyModuleSD::process (datatools::things &event)
       energy_array[an_om_id] += a_calo_hit->get_energy_deposit();
     }
   }
-  
+  energy_tot =0;
   energy_vector.clear();
   om_id_vector.clear();
   for (int j =0; j < 712 ; j++){
     if (energy_array[j] > 0){
-      std::cout <<"om_id : " << j << "   energie deposit : " << energy_array[j]<< std::endl;
+      energy_tot += energy_array[j];
+      //std::cout <<"om_id : " << j << "   energie deposit : " << energy_array[j]<< std::endl;
       energy_vector.push_back (energy_array[j]);
       om_id_vector.push_back (j);
      
     }
   }
-  if (energy_vector.size() >0){
-    Result_tree->Fill();
-  }
 
 
   ++nb_events_processed;
-  return PROCESS_OK;}
   
+  if (energy_vector.size() >0){
+    Result_tree->Fill();
+    return PROCESS_OK;
+  }
+  else return PROCESS_STOP;
+
+
+  
+}
+
 
 void MyModuleSD::finalize()
 {
