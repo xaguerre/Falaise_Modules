@@ -10,7 +10,7 @@ project(MyModuleSD)
 find_package(Falaise REQUIRED)
 
 # Build a shared/dynamic library from our source
-add_library(MyModuleSD SHARED MyModuleSD.cpp)
+add_library(MyModuleSD SHARED MyModuleSD.cpp MyModuleOC.cpp)
 
 # Link this library to the FalaiseModule library
 # This ensures the correct compiler flags, include paths
@@ -18,4 +18,4 @@ add_library(MyModuleSD SHARED MyModuleSD.cpp)
 target_link_libraries(MyModuleSD Falaise::FalaiseModule)
 
 configure_file("MyModulePipelineSD.conf.in" "MyModulePipelineSD.conf" @ONLY)
-
+configure_file("MyModulePipelineOC.conf.in" "MyModulePipelineOC.conf" @ONLY)

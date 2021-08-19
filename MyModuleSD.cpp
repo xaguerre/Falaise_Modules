@@ -4,6 +4,7 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TObject.h"
+//#include <ThreeVector.h> 
 
 //////////////////////////////
 // Module class declaration //
@@ -29,10 +30,10 @@ private:
   double energy_tot;
   std::vector <double> energy_vector;
   std::vector <int> om_id_vector;  
-
+  float vertex_position[3];
+  
   TFile *file;
   TTree *Result_tree;
-
 
   unsigned long long nb_events_processed;
 };
@@ -65,8 +66,7 @@ void MyModuleSD::initialize(const datatools::properties & parameters, datatools:
   Result_tree->Branch("om_id", &om_id_vector);
   Result_tree->Branch("energy", &energy_vector);
   Result_tree->Branch("energy_tot", &energy_tot);
-
-
+  Result_tree->Branch("vertex_position", &vertex_position, "vertex_position[3]/F");
 
 }
 
@@ -78,10 +78,13 @@ dpp::chain_module::process_status MyModuleSD::process (datatools::things &event)
   
   memset(energy_array, 0, 712*sizeof(double));
 
-  
   auto& simData = event.get<mctools::simulated_data>("SD");
   //  simData.tree_dump();
   
+  const geomtools::vector_3d & vertex_position_3d = simData.get_vertex();
+  vertex_position[0] = vertex_position_3d.x();
+  vertex_position[1] = vertex_position_3d.y();
+  vertex_position[2] = vertex_position_3d.z();
   if (simData.has_step_hits ("calo")){
     for (auto& a_calo_hit :  simData.get_step_hits("calo")){
       auto& geom_hit =  a_calo_hit->get_geom_id();
@@ -103,6 +106,7 @@ dpp::chain_module::process_status MyModuleSD::process (datatools::things &event)
       energy_array[an_om_id] += a_calo_hit->get_energy_deposit();
     }
   }
+
   energy_tot =0;
   energy_vector.clear();
   om_id_vector.clear();
@@ -112,7 +116,6 @@ dpp::chain_module::process_status MyModuleSD::process (datatools::things &event)
       //std::cout <<"om_id : " << j << "   energie deposit : " << energy_array[j]<< std::endl;
       energy_vector.push_back (energy_array[j]);
       om_id_vector.push_back (j);
-     
     }
   }
 
